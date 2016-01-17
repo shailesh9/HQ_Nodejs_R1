@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <title>Place Order</title>
+</head>
+<body>
+<div class="container">
+    <form id = "orderCheck" class="form-horizontal" role="form">
+        <fieldset>
+            <legend>Order</legend>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Amount</label>
+                <div class="col-sm-9">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <select class="form-control col-sm-2" id ="currency" required>
+                                <option value="">Currency</option>
+                                <option value="01">USD</option>
+                                <option value="02">EUR</option>
+                                <option value="03">THB</option>
+                                <option value="04">HKD</option>
+                                <option value="05">SGD</option>
+                                <option value="06">AUD</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-3">
+                            <input type="text" name="Price" id="Price" class="form-control" pattern="^[0-9]*(\.[0-9]{1,2})?$" placeholder="Price"/ required>
+                        </div>
+                        <span class="help-block with-errors">
+                                Enter amount as a number (2 decimal places max.), e.g. 50, 49.99 etc.
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="customer-name">Customer Name</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" name="customer-name" id="customer-name" placeholder="Customer's Name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="card-holder-name">Name on Card</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" name="card-holder-name" id="card-holder-name" placeholder="Card Holder's Name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="card-number">Card Number</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" name="card-number" id="card-number" placeholder="Debit/Credit Card Number" pattern="[0-9]{15,16}" required>
+                    <span class="help-block with-errors">
+                         Enter 16-digit credit card number. No spaces or dashes.
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="expiry-month">Expiration Date</label>
+                <div class="col-sm-9">
+                    <div class="row">
+                       <div class="col-xs-3">
+                            <input type="text" class="form-control" id="card-expiration"
+                                                pattern="^(0[1-9]|1[0-2])\/20[0-9][0-9]$"
+                                name="cardExpiration" placeholder="MM/YYYY" size="7" required>
+                        </div>
+                        <span class="help-block with-errors">
+                                     Enter the expiration date on the credit card in the format
+                                    MM/YYYY.
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="cvv">Card CVV</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" name="cvv" id="cvv" placeholder="Security Code" format="^[0-9]{3,4}$" required>
+                </div>
+                <span class="help-block with-errors">
+                    Enter the CCV code from your credit card. 3-4 digits only.
+                </span>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button id="checkout" type="submit" class="btn btn-success">Pay now</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<script>
+    if (!window.jQuery) {
+      document.write('<script src="vendor/jquery/dist/jquery.min.js"><\/script>');
+    }
+  </script>
+<script>
+    jQuery(document).ready(function ($){
+        $('#orderCheck').on('submit', function (event){
+            event.preventDefault();
+            event.returnValue = false;
+
+           $(this).find('button[type="submit"]').button('loading');
+
+            $.ajax({
+                type: 'POST',
+                url: '/',
+                data: {
+                    creditCardNumber: $('#card-number').val(),
+                    creditCardHolderName: $('#card-holder-name').val(),
+                    creditCardExpiration: $('#card-expiration').val(),
+                    creditCardVerification: $('#cvv').val(),
+                    totalAmount: $('#Price').val(),
+                    currency: $('#currency option:selected').text(),
+                    custName: $('#customer-name').val()
+                },
+                dataType: 'json',
+                success: function(response){
+                    if(response.status === 'approved' || response.status === 'authorized'){
+                        $('#orderCheck').find('.response').remove();
+                        $('#orderCheck').append(
+                            "<div class='row response'>"+
+                            "<p class='form-control-static input-lg text-success text-center lead'>"+
+                            "<span class='glyphicon glyphicon-ok-sign'></span> "+
+                            "Transaction was completed successfully.<br>" +
+                            "</p>" +
+                            "</div>"
+                        );    
+                    }
+                    $("#orderCheck").find('button[type="submit"]').button('reset');
+                },
+                error: function(error){
+                    var resp = error.responseText;
+                    
+                    $('#orderCheck').find('.response').remove();
+                      $('#orderCheck').append(
+                        "<div class='row response'>" +
+                        "<p class='form-control-static input-lg text-danger text-center lead'>" +
+                        "<span class='glyphicon glyphicon-remove-sign'></span> "+
+                        "An error was encountered while processing your transaction.<br>" +
+                        "<code>" + resp + "</code>" +
+                        "</p>" +
+                        "</div>"
+                      );
+                      $("#orderCheck").find('button[type="submit"]').button('reset');
+                }
+            })
+
+        })
+    })
+</script>
+</body>
+</html>

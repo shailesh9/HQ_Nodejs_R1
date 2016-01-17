@@ -1,0 +1,29 @@
+{
+  "currencies": [
+    "USD",
+    "EUR",
+    "AUD",
+    "THB",
+    "HKD",
+    "SGD"
+  ],
+  "cards": {
+    "types": {
+      "amex": "3[47][0-9]{13}",
+      "visa": "4[0-9]{12}(?:[0-9]{3})?",
+      "discover": "6(?:011|5[0-9]{2})[0-9]{12}",
+      "jcb": "^(?:2131|1800|35\\d{3})\\d{11}$",
+      "mastercard": "5[1-5][0-9]{14}"
+    }
+  },
+  "gateways": {
+    "PayPal": "./lib/gateways/PayPal.js",
+    "Braintree": "./lib/gateways/Braintree.js"
+  },
+  "rules": [
+    {"type": "amex", "currency": "USD"},
+    {"type": "amex", "gateway": "PayPal"},
+    {"currency": "USD|EUR|AUD", "gateway": "PayPal"},
+    {"currency": "THB|HKD|SGD", "gateway": "Braintree"}
+  ]
+}
