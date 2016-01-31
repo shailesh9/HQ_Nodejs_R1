@@ -1,13 +1,23 @@
 ###To run the example:
 
     npm install
-
+    node app.js
 
 You also need [MongoDB](https://www.mongodb.org/) installed on your system. Details are saved in a database named `hq`, in a collection called `payments`.
 
 ###About the library
 
-The payment library is fully functional as per the rules described in the [Assignment](https://github.com/HQInterview/Nodejs-Round1) repo's README. The library follows a mixture of object-oriented and async-callback approaches. A `Payment` object can be constructed by passing the `Payment` function an object containing credit card and transaction information. The `Payment` class has methods for validating the credentials which are called one by one.
+The payment library is fully functional as per the rules that can handle payments with:
+
+* [Paypal REST API](https://github.com/paypal/rest-api-sdk-nodejs)
+* [Braintree payments](https://www.braintreepayments.com/docs/node/)
+
+Use a different gateway based on these rules:
+  * if credit card type is AMEX, then use Paypal.
+  * if currency is USD, EUR, or AUD, then use Paypal. Otherwise use Braintree.
+  * if currency is **not** USD and credit card **is** AMEX, return error message, that AMEX is possible to use only for USD
+
+The library follows a mixture of object-oriented and async-callback approaches. A `Payment` object can be constructed by passing the `Payment` function an object containing credit card and transaction information. The `Payment` class has methods for validating the credentials which are called one by one.
 
 Rules for allowed card types, currencies, etc. are defined in the root at `config.json`. However, the rules are mutable and extendable. New rules can be added and the default ones be changed by passing options object as the second argument to the constructor.
 
